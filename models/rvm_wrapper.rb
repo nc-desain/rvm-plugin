@@ -18,7 +18,7 @@ class RvmWrapper < Jenkins::Tasks::BuildWrapper
 
   def rvm_path
     ["~/.rvm/scripts/rvm", "/usr/local/rvm/scripts/rvm"].find do |path|
-      @launcher.execute("bash", "-c", "test -f #{path}") == 0
+      @launcher.execute("bash", "-c", "-l", "test -f #{path}") == 0
     end
   end
 
@@ -33,7 +33,7 @@ class RvmWrapper < Jenkins::Tasks::BuildWrapper
     listener << "Capturing environment variables produced by 'rvm use #{rvm_string}'\n"
 
     before = StringIO.new()
-    if launcher.execute("bash", "-c", "export", {:out => before}) != 0 then
+    if launcher.execute("bash", "-c", "-l", "export", {:out => before}) != 0 then
       listener << "Failed to fork bash\n"
       listener << before.string
       build.abort
@@ -47,7 +47,7 @@ class RvmWrapper < Jenkins::Tasks::BuildWrapper
       launcher.execute(Shellwords::shellescape(installer.realpath), {:out => listener})
     end
 
-    if launcher.execute("bash","-c"," source #{rvm_path} && rvm use --install --create #{rvm_string} && export > rvm.env", {:out=>listener,:chdir=>build.workspace}) != 0 then
+    if launcher.execute("bash","-c", "-l", " source #{rvm_path} && rvm use --install --create #{rvm_string} && export > rvm.env", {:out=>listener,:chdir=>build.workspace}) != 0 then
       build.abort "Failed to setup RVM environment"
     end
 
